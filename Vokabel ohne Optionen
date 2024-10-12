@@ -1,0 +1,92 @@
+import random
+
+# Function to load vocabulary from a text file
+def load_vocab(file_path):
+    vocab = {}
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                # Ignore commented-out lines and empty lines
+                if line.startswith('#') or ':' not in line:
+                    continue
+                word, definition = line.split(':', 1)
+                vocab[word.strip()] = definition.strip()
+    except FileNotFoundError:
+        print(f"Error: The file {file_path} was not found.")
+    except Exception as e:
+        print(f"Error: {e}")
+    return vocab
+
+# Function to play the game
+def play_game(vocab):
+    if not vocab:
+        print("No vocabulary loaded. Please check your input file.")
+        return
+
+    print("B1 Vokabeln")
+    print("Review the word and reveal the correct definition by pressing 1, or get multiple choice options by pressing 2.")
+
+    words = list(vocab.keys())
+
+    # Randomize the order of the words
+    random.shuffle(words)
+
+    for i, word in enumerate(words):
+        print(f"\nWord {i + 1}: {word}")
+
+        # Ask the player for their choice
+        choice = input("Press 1 to reveal the definition or 2 for multiple choice options: ")
+
+        if choice == '1':
+            # Show the correct definition
+            correct_definition = vocab[word]
+            print(f"Definition: {correct_definition}")
+        elif choice == '2':
+            # Create a list of options including the correct definition
+            options = list(vocab.values())
+            # Ensure the correct answer is included
+            correct_answer = vocab[word]
+            # Get three other random definitions (options)
+            wrong_options = random.sample([v for v in options if v != correct_answer], 3)
+            all_options = wrong_options + [correct_answer]
+            random.shuffle(all_options)  # Shuffle the options
+
+            print("Here are your options:")
+            for index, option in enumerate(all_options, start=1):
+                print(f"{index}. {option}")
+
+            # Get the player's answer
+            while True:
+                try:
+                    player_choice = int(input("Select the number of your answer: ")) - 1
+                    if 0 <= player_choice < len(all_options):
+                        break
+                    else:
+                        print(f"Please select a number between 1 and {len(all_options)}.")
+                except ValueError:
+                    print("Invalid input. Please enter a number.")
+
+            # Check if the answer is correct
+            if all_options[player_choice] == correct_answer:
+                print("Correct!")
+            else:
+                print(f"Incorrect. The correct answer was: {correct_answer}")
+        else:
+            print("Invalid choice. Please enter 1 or 2.")
+
+# Ask the user for the file path
+file_path = input("Enter the path to your vocabulary file: ").strip()
+print(f"Loading vocabulary from: {file_path}")  # Debug print
+
+# Load vocabulary from the specified path
+vocab = load_vocab(file_path)
+
+# Debug print to check the loaded vocabulary
+if vocab:
+    print("Vocabulary loaded successfully!")
+else:
+    print("No vocabulary loaded.")
+
+# Start the game
+play_game(vocab)
