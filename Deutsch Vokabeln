@@ -1,0 +1,76 @@
+import random
+
+# Function to load vocabulary from a text file
+def load_vocab(file_path):
+    vocab = {}
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                # Ignore commented-out lines and empty lines
+                if line.startswith('#') or ':' not in line:
+                    continue
+                word, definition = line.split(':', 1)
+                vocab[word.strip()] = definition.strip()
+    except FileNotFoundError:
+        print(f"Error: The file {file_path} was not found.")
+    except Exception as e:
+        print(f"Error: {e}")
+    return vocab
+
+# Function to play the game
+def play_game(vocab):
+    if not vocab:
+        print("No vocabulary loaded. Please check your input file.")
+        return
+
+    print("B1 Vokabeln")
+    print("Match the word to its correct definition.")
+
+    words = list(vocab.keys())
+    definitions = list(vocab.values())
+
+    # Randomize the order of the words
+    random.shuffle(words)
+
+    for i, word in enumerate(words):
+        print(f"\nWord {i + 1}: {word}")
+
+        # Get the correct definition and 3 random incorrect definitions
+        correct_definition = vocab[word]
+        incorrect_definitions = random.sample([d for d in definitions if d != correct_definition], 3)
+
+        # Create a list of 4 choices and shuffle them
+        choices = incorrect_definitions + [correct_definition]
+        random.shuffle(choices)
+
+        # Display the choices
+        for j, definition in enumerate(choices, 1):
+            print(f"{j}. {definition}")
+
+        # Get the user's answer
+        try:
+            answer = int(input(f"Select the correct definition for '{word}' (1-4): "))
+            if choices[answer - 1] == correct_definition:
+                print("Correct!")
+            else:
+                print("Incorrect.")
+        except (ValueError, IndexError):
+            print("Invalid input, please enter a number between 1 and 4.")
+
+# Ask the user for the file path
+file_path = input("Enter the path to your vocabulary file: ").strip()
+print(f"Loading vocabulary from: {file_path}")  # Debug print
+
+# Load vocabulary from the specified path
+vocab = load_vocab(file_path)
+
+# Debug print to check the loaded vocabulary
+if vocab:
+    print("Vocabulary loaded successfully!")
+    print(vocab)
+else:
+    print("No vocabulary loaded.")
+
+# Start the game
+play_game(vocab)
